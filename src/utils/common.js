@@ -15,9 +15,11 @@ export const bytesToSize = (bytes) => {
   return { size: (bytes / Math.pow(1024, i)).toFixed(1), type: sizes[i] };
 };
 
-const getMaxDimension = (condition) => (condition ? 3500 : 2500);
+// For typical landscape image
+const getMaxDimension = (condition, maxWidth, maxHeight) =>
+  condition ? maxWidth : maxHeight;
 
-export const compressImage = (file, callback) => {
+export const compressImage = (file, { maxWidth, maxHeight }, callback) => {
   if (file.size <= 2 * 1e6) {
     return callback(file);
   }
@@ -29,8 +31,12 @@ export const compressImage = (file, callback) => {
     const isSquare = img.width === img.height;
 
     new Compressor(file, {
-      maxWidth: getMaxDimension(!isSquare || isLandscape),
-      maxHeight: getMaxDimension(!isSquare || !isLandscape),
+      maxWidth: getMaxDimension(!isSquare || isLandscape, maxWidth, maxHeight),
+      maxHeight: getMaxDimension(
+        !isSquare || !isLandscape,
+        maxWidth,
+        maxHeight
+      ),
       success(result) {
         callback(result);
       },

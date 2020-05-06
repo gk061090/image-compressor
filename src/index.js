@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
 import { saveAs } from "file-saver";
 import FileInput from "./FileInput";
-import { hasFile, bytesToSize, compressImage } from "./utils";
+import { hasFile, bytesToSize, compressImage } from "./utils/common";
+import { changeDpiBlob } from "./utils/changeDpi";
 import "./style.scss";
 
 const FileSize = ({ file }) => {
@@ -20,6 +21,12 @@ const App = () => {
   const [compressedFile, setCompressedFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState("");
 
+  // Params from inputs
+  const [hasParams, setHasParams] = useState(false);
+  const [maxWidth, setMaxWidth] = useState(3500);
+  const [maxHeight, setMaxHeight] = useState(2500);
+  const [dpi, setDpi] = useState(72);
+
   const handleChange = ({ files, value }) => {
     setFile(files[0]);
     setFileName(value);
@@ -36,11 +43,14 @@ const App = () => {
   };
 
   const handleCompress = useCallback(() => {
-    compressImage(compressedFile || file, setCompressedFile);
-  }, [compressedFile, file]);
+    compressImage(
+      compressedFile || file,
+      { maxWidth, maxHeight },
+      setCompressedFile
+    );
+  }, [compressedFile, file, maxHeight, maxWidth]);
 
   useEffect(() => {
-    // console.log(file && file.in("size"));
     if (!hasFile(file)) {
       return;
     }
@@ -80,13 +90,54 @@ const App = () => {
             <img src={imagePreviewUrl} alt={file.name} />
           </div>
           <div>
-            <button onClick={() => saveAs(compressedFile, compressedFile.name)}>
+            <button
+              onClick={async () => {
+                const compressedChangedDpiFile = await changeDpiBlob(
+                  compressedFile,
+                  dpi
+                );
+                saveAs(compressedChangedDpiFile, compressedFile.name);
+              }}
+            >
               Download
             </button>
             <button onClick={clearFiles}>Clear</button>
           </div>
         </div>
       ) : null}
+      <div className="params">
+        {hasParams ? (
+          <>
+            <div>
+              <label>Макс ширина</label>
+              <input
+                type="tel"
+                value={maxWidth}
+                onChange={(e) => setMaxWidth(e.target.value)}
+              />
+            </div>
+            <div>
+              <label>Макс длина</label>
+              <input
+                type="tel"
+                value={maxHeight}
+                onChange={(e) => setMaxHeight(e.target.value)}
+              />
+            </div>
+            <div>
+              <label>DPI</label>
+              <input
+                type="tel"
+                value={dpi}
+                onChange={(e) => setDpi(e.target.value)}
+              />
+              <label>изменяется только при загрузке (download) файла</label>
+            </div>
+          </>
+        ) : (
+          <span onClick={() => setHasParams(true)}>Показать параметры</span>
+        )}
+      </div>
     </div>
   );
 };

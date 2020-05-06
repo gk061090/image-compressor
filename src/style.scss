@@ -38,3 +38,25 @@ body {
     border-radius: 5px;
   }
 }
+
+.params {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-column-gap: 10px;
+  margin-top: 20px;
+
+  &>div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  label {
+    font-size: 12px;
+  }
+
+  span {
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}
