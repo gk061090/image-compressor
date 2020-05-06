@@ -1,0 +1,40 @@
+body {
+  font-family: sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+}
+
+.files {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 10px;
+  padding: 10px 0;
+}
+
+.file {
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+}
+
+.result {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 10px;
+}
+
+.preview {
+  img {
+    max-width: 100%;
+    border-radius: 5px;
+  }
+}

@@ -1,0 +1,39 @@
+import Compressor from "compressorjs";
+import { isNil } from "lodash";
+
+export const hasFile = (file) => {
+  if (isNil(file)) {
+    return false;
+  }
+  return typeof file.name === "string" && file.size > 0;
+};
+
+export const bytesToSize = (bytes) => {
+  var sizes = ["Bytes", "KB", "MB"];
+  if (bytes === 0) return "0 Byte";
+  var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+  return { size: (bytes / Math.pow(1024, i)).toFixed(1), type: sizes[i] };
+};
+
+const getMaxDimension = (condition) => (condition ? 3500 : 2500);
+
+export const compressImage = (file, callback) => {
+  if (file.size <= 2 * 1e6) {
+    return callback(file);
+  }
+
+  const img = new Image();
+  img.src = window.URL.createObjectURL(file);
+  img.onload = function () {
+    const isLandscape = img.width > img.height;
+    const isSquare = img.width === img.height;
+
+    new Compressor(file, {
+      maxWidth: getMaxDimension(!isSquare || isLandscape),
+      maxHeight: getMaxDimension(!isSquare || !isLandscape),
+      success(result) {
+        callback(result);
+      },
+    });
+  };
+};

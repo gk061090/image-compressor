@@ -1,82 +1,93 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
-import Compressor from "compressorjs";
 import { saveAs } from "file-saver";
-
-function bytesToSize(bytes) {
-  var sizes = ["Bytes", "KB", "MB"];
-  if (bytes === 0) return "0 Byte";
-  var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-  return { size: Math.round(bytes / Math.pow(1024, i), 2), type: sizes[i] };
-}
-
-const FileInput = ({ value, onChange }) => (
-  <input type="file" name="file[]" value={value} onChange={onChange} multiple />
-);
+import FileInput from "./FileInput";
+import { hasFile, bytesToSize, compressImage } from "./utils";
+import "./style.scss";
 
 const FileSize = ({ file }) => {
-  if (typeof file.name !== "string") {
-    return <div>No file.</div>;
-  }
   const { size, type } = bytesToSize(file.size);
   return (
-    <div style={{ color: type === "MB" && size > 5 ? "red" : "green" }}>
-      Current value: {size} {type}.
+    <div style={{ color: file.size <= 2 * 1e6 ? "green" : "red" }}>
+      Размер: {size} {type}.
     </div>
   );
 };
 
 const App = () => {
   const [fileName, setFileName] = useState("");
-  const [file, setFile] = useState({});
+  const [file, setFile] = useState(null);
   const [compressedFile, setCompressedFile] = useState(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
 
   const handleChange = ({ files, value }) => {
     setFile(files[0]);
     setFileName(value);
+    //clear
+    setCompressedFile(null);
+    setImagePreviewUrl("");
   };
 
-  const handleCompress = () => {
-    const currentFile = compressedFile || file;
-    const { size, type } = bytesToSize(currentFile.size);
+  const clearFiles = () => {
+    setFile({});
+    setFileName("");
+    setCompressedFile(null);
+    setImagePreviewUrl("");
+  };
 
-    if (type === "MB" && size <= 5) {
+  const handleCompress = useCallback(() => {
+    compressImage(compressedFile || file, setCompressedFile);
+  }, [compressedFile, file]);
+
+  useEffect(() => {
+    // console.log(file && file.in("size"));
+    if (!hasFile(file)) {
       return;
     }
+    handleCompress();
+  }, [file, handleCompress]);
 
-    const img = new Image();
-    img.src = window.URL.createObjectURL(currentFile);
-    img.onload = function () {
-      new Compressor(currentFile, {
-        maxWidth: img.width * 0.75,
-        maxHeight: img.height * 0.75,
-        success(result) {
-          setCompressedFile(result);
-        },
-      });
-    };
-  };
+  useEffect(() => {
+    if (!compressedFile) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreviewUrl(reader.result);
+    reader.readAsDataURL(compressedFile);
+  }, [compressedFile]);
 
   return (
-    <>
+    <div className="container">
       <FileInput value={fileName} onChange={(e) => handleChange(e.target)} />
-      <p>оригинальный файл:</p>
-      <FileSize file={file} />
-      {fileName && (
-        <button onClick={() => handleCompress()}>
-          Сжать файл (можно несколько раз)
-        </button>
+      {hasFile(file) && (
+        <div className="files">
+          <div className="file">
+            <span>оригинальный файл:</span>
+            <FileSize file={file} />
+          </div>
+          {hasFile(compressedFile) && (
+            <div className="file">
+              <span>сжатый файл:</span>
+              <FileSize file={compressedFile} />
+            </div>
+          )}
+        </div>
       )}
-      {compressedFile ? (
-        <>
-          <p>сжатый файл:</p>
-          <FileSize file={compressedFile} />
-          <button onClick={() => saveAs(compressedFile, compressedFile.name)}>
-            Download
-          </button>
-        </>
+
+      {imagePreviewUrl ? (
+        <div className="result">
+          <div className="preview">
+            <img src={imagePreviewUrl} alt={file.name} />
+          </div>
+          <div>
+            <button onClick={() => saveAs(compressedFile, compressedFile.name)}>
+              Download
+            </button>
+            <button onClick={clearFiles}>Clear</button>
+          </div>
+        </div>
       ) : null}
-    </>
+    </div>
   );
 };
 
