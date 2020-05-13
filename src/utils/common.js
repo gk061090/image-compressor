@@ -28,15 +28,11 @@ export const compressImage = (file, { maxWidth, maxHeight }, callback) => {
   img.src = window.URL.createObjectURL(file);
   img.onload = function () {
     const isLandscape = img.width > img.height;
-    const isSquare = img.width === img.height;
+    // const isSquare = img.width === img.height;
 
     new Compressor(file, {
-      maxWidth: getMaxDimension(!isSquare || isLandscape, maxWidth, maxHeight),
-      maxHeight: getMaxDimension(
-        !isSquare || !isLandscape,
-        maxWidth,
-        maxHeight
-      ),
+      maxWidth: getMaxDimension(isLandscape, maxWidth, maxHeight),
+      maxHeight: getMaxDimension(!isLandscape, maxWidth, maxHeight),
       success(result) {
         callback(result);
       },
