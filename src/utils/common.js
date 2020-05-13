@@ -19,6 +19,9 @@ export const bytesToSize = (bytes) => {
 const getMaxDimension = (condition, maxWidth, maxHeight) =>
   condition ? maxWidth : maxHeight;
 
+const getSmallDimension = (maxWidth, maxHeight) =>
+  maxWidth < maxHeight ? maxWidth : maxHeight;
+
 export const compressImage = (file, { maxWidth, maxHeight }, callback) => {
   if (file.size <= 2 * 1e6) {
     return callback(file);
@@ -28,11 +31,15 @@ export const compressImage = (file, { maxWidth, maxHeight }, callback) => {
   img.src = window.URL.createObjectURL(file);
   img.onload = function () {
     const isLandscape = img.width > img.height;
-    // const isSquare = img.width === img.height;
+    const isSquare = img.width === img.height;
 
     new Compressor(file, {
-      maxWidth: getMaxDimension(isLandscape, maxWidth, maxHeight),
-      maxHeight: getMaxDimension(!isLandscape, maxWidth, maxHeight),
+      maxWidth: isSquare
+        ? getSmallDimension(maxWidth, maxHeight)
+        : getMaxDimension(isLandscape, maxWidth, maxHeight),
+      maxHeight: isSquare
+        ? getSmallDimension(maxWidth, maxHeight)
+        : getMaxDimension(!isLandscape, maxWidth, maxHeight),
       success(result) {
         callback(result);
       },
