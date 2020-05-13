@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
+import { StateInspector, useState } from "reinspect";
 import { saveAs } from "file-saver";
 import { changeDpiBlob } from "changedpi";
 import Viewer from "react-viewer";
@@ -17,16 +18,16 @@ const FileSize = ({ file }) => {
 };
 
 const App = () => {
-  const [fileName, setFileName] = useState("");
-  const [file, setFile] = useState(null);
-  const [compressedFile, setCompressedFile] = useState(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
+  const [fileName, setFileName] = useState("", "fileName");
+  const [file, setFile] = useState(null, "file");
+  const [compressedFile, setCompressedFile] = useState(null, "compressedFile");
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("", "imagePreviewUrl");
 
   // Params from inputs
   const [hasParams, setHasParams] = useState(false);
-  const [maxWidth, setMaxWidth] = useState(3500);
-  const [maxHeight, setMaxHeight] = useState(2500);
-  const [dpi, setDpi] = useState(72);
+  const [maxWidth, setMaxWidth] = useState(3500, "Output maxWidth");
+  const [maxHeight, setMaxHeight] = useState(2500, "Output maxHeight");
+  const [dpi, setDpi] = useState(72, "Output DPI");
 
   // Modal
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -157,7 +158,9 @@ const App = () => {
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <StateInspector name="App">
+      <App />
+    </StateInspector>
   </React.StrictMode>,
   document.getElementById("root")
 );

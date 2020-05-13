@@ -28,17 +28,27 @@ export const compressImage = (file, { maxWidth, maxHeight }, callback) => {
   const img = new Image();
   img.src = window.URL.createObjectURL(file);
   img.onload = function () {
-    const isLandscape = img.width > img.height;
-    const isSquare = img.width === img.height;
+    const { width, height } = img;
+    const isLandscape = width > height;
+    const isSquare = width === height;
+
+    // prepared max width and height
+    const maxW = isSquare
+      ? getSmallDimension(maxWidth, maxHeight)
+      : getMaxDimension(isLandscape, maxWidth, maxHeight);
+    const maxH = isSquare
+      ? getSmallDimension(maxWidth, maxHeight)
+      : getMaxDimension(!isLandscape, maxWidth, maxHeight);
+
+    // return w/o compress
+    if (file.size <= 2 * 1e6 && width <= maxWidth && height <= maxHeight) {
+      return callback(file);
+    }
 
     new Compressor(file, {
       quality: getQuality(file.size),
-      maxWidth: isSquare
-        ? getSmallDimension(maxWidth, maxHeight)
-        : getMaxDimension(isLandscape, maxWidth, maxHeight),
-      maxHeight: isSquare
-        ? getSmallDimension(maxWidth, maxHeight)
-        : getMaxDimension(!isLandscape, maxWidth, maxHeight),
+      maxWidth: maxW,
+      maxHeight: maxH,
       success(result) {
         callback(result);
       },
