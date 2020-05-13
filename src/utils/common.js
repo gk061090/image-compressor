@@ -22,11 +22,9 @@ const getMaxDimension = (condition, maxWidth, maxHeight) =>
 const getSmallDimension = (maxWidth, maxHeight) =>
   maxWidth < maxHeight ? maxWidth : maxHeight;
 
-export const compressImage = (file, { maxWidth, maxHeight }, callback) => {
-  if (file.size <= 2 * 1e6) {
-    return callback(file);
-  }
+const getQuality = (fileSize) => (fileSize <= 2 * 1e6 ? 1 : 0.8);
 
+export const compressImage = (file, { maxWidth, maxHeight }, callback) => {
   const img = new Image();
   img.src = window.URL.createObjectURL(file);
   img.onload = function () {
@@ -34,6 +32,7 @@ export const compressImage = (file, { maxWidth, maxHeight }, callback) => {
     const isSquare = img.width === img.height;
 
     new Compressor(file, {
+      quality: getQuality(file.size),
       maxWidth: isSquare
         ? getSmallDimension(maxWidth, maxHeight)
         : getMaxDimension(isLandscape, maxWidth, maxHeight),
