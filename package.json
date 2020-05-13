@@ -7,13 +7,16 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "axios": "^0.19.2",
+    "changedpi": "^1.0.4",
     "compressorjs": "^1.0.6",
     "file-saver": "^2.0.2",
     "lodash": "^4.17.15",
     "node-sass": "^4.14.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1"
+    "react-scripts": "3.4.1",
+    "react-viewer": "^3.2.1",
+    "viewerjs": "^1.5.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -35,5 +38,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "fslightbox-react": "^1.4.9"
   }
 }

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
 import { saveAs } from "file-saver";
+import { changeDpiBlob } from "changedpi";
+import Viewer from "react-viewer";
 import FileInput from "./FileInput";
 import { hasFile, bytesToSize, compressImage } from "./utils/common";
-import { changeDpiBlob } from "./utils/changeDpi";
 import "./style.scss";
 
 const FileSize = ({ file }) => {
@@ -26,6 +27,9 @@ const App = () => {
   const [maxWidth, setMaxWidth] = useState(3500);
   const [maxHeight, setMaxHeight] = useState(2500);
   const [dpi, setDpi] = useState(72);
+
+  // Modal
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const handleChange = ({ files, value }) => {
     setFile(files[0]);
@@ -87,7 +91,16 @@ const App = () => {
       {imagePreviewUrl ? (
         <div className="result">
           <div className="preview">
-            <img src={imagePreviewUrl} alt={file.name} />
+            <img
+              src={imagePreviewUrl}
+              alt={file.name}
+              onClick={() => setModalIsOpen(!modalIsOpen)}
+            />
+            <Viewer
+              visible={modalIsOpen}
+              onClose={() => setModalIsOpen(!modalIsOpen)}
+              images={[{ src: imagePreviewUrl, alt: "" }]}
+            />
           </div>
           <div>
             <button
